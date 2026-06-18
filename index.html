@@ -100,6 +100,10 @@
 
   <div class="feed">
     <div class="post">
+      <div class="head"><div class="av">&#127903;</div><div><div class="name">Your events</div><div class="time">tickets &amp; plans, all in one place</div></div><button class="btn" id="addEventTop" style="margin-left:auto;padding:5px 12px">+ Add</button></div>
+      <div class="body" id="eventsList"></div>
+    </div>
+    <div class="post">
       <div class="head"><div class="av">&#10024;</div><div><div class="name">Today</div><div class="time">just now</div></div></div>
       <div class="body">Tap below for what's on, anything to remember, and what's free.</div>
       <div class="row"><button class="btn fill" data-act="brief">What's on today?</button></div>
@@ -125,7 +129,7 @@
   </div>
 
   <div class="nav">
-    <span class="home">&#127968;</span><span>&#128269;</span><span class="plus">&#10753;</span><span>&#9825;</span><span>&#128100;</span>
+    <span class="home">&#127968;</span><span>&#128269;</span><span class="plus" id="addBtn" style="cursor:pointer">&#10753;</span><span>&#9825;</span><span>&#128100;</span>
   </div>
 
   <!-- Settings sheet: the only place personal details live, and they stay on this device -->
@@ -158,6 +162,20 @@
         <div class="crow2"><span class="ci">&#10024;</span><div class="cmeta"><div class="cname">Claude</div><div class="cdesc">Run the meal and weekend brains inside the app, no copy-paste</div></div><span class="soonpill">Soon</span></div>
       </div>
       <p class="priv">These need the secure helper we build in Stage 2. Each will be a simple Connect button with a Google-style login.</p>
+    </div>
+  </div>
+
+  <!-- Add an event, with its ticket link bundled in so nothing gets lost -->
+  <div class="sheet" id="evSheet">
+    <div class="panel">
+      <h2>Add an event</h2>
+      <p class="sub">Pop the ticket or booking link in with it, so everything's in one place and you never go hunting for it.</p>
+      <div class="field"><label>What is it?</label><input id="e_title" placeholder="e.g. Disney on Ice"></div>
+      <div class="field"><label>When?</label><input id="e_date" type="date"></div>
+      <div class="field"><label>Ticket or booking link</label><input id="e_link" placeholder="paste the Eventbrite or Ticketmaster link"></div>
+      <button class="save" id="e_save">Save it here</button>
+      <button class="save" id="e_cal" style="background:#fff;color:var(--accent-ink);border:.5px solid var(--line);margin-top:9px">Save &amp; add to my calendar</button>
+      <p class="priv">Saved on this phone, with the link attached.</p>
     </div>
   </div>
 
@@ -239,9 +257,42 @@
   document.getElementById('capSend').addEventListener('click',function(){var v=document.getElementById('cap').value.trim();if(!v){toast("Type or speak something first");return;}askClaude("Add this to our family plan and tell me if it needs a calendar event or reminder: "+v);document.getElementById('cap').value="";});
   document.querySelectorAll('.feed [data-act]').forEach(function(el){el.addEventListener('click',function(){var k=el.getAttribute('data-act');bump(k);var a=ACTIONS[k];if(a)a();});});
 
+  // events: bundle each event with its ticket link, all in one place, nothing forgotten
+  function getEvents(){try{return JSON.parse(localStorage.getItem('famhub_events')||'[]');}catch(e){return [];}}
+  function setEvents(a){try{localStorage.setItem('famhub_events',JSON.stringify(a));}catch(e){}}
+  function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function safeUrl(u){u=(u||'').trim();return /^https?:\/\//i.test(u)?u:'';}
+  function niceDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('en-IE',{day:'numeric',month:'short'});}catch(e){return d;}}
+  function renderEvents(){
+    var box=document.getElementById('eventsList');var list=getEvents();
+    if(!list.length){box.innerHTML="Nothing saved yet. Add an event and pop its ticket link in with it, so it's never lost.";return;}
+    list.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+    box.innerHTML=list.map(function(ev){
+      var when=ev.date?(' &middot; '+niceDate(ev.date)):'';
+      var lk=safeUrl(ev.link);var link=lk?(' &nbsp;<a href="'+lk+'" target="_blank" style="color:var(--accent-ink)">tickets</a>'):'';
+      return '<div style="padding:6px 0;border-bottom:.5px solid var(--line)"><b>'+esc(ev.title)+'</b>'+when+link+'</div>';
+    }).join('');
+  }
+  function calUrlFor(title,date,link){
+    var u="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(title||'Event');
+    var lk=safeUrl(link);if(lk)u+="&details="+encodeURIComponent('Tickets / link: '+lk);
+    if(date){var s=date.replace(/-/g,'');var dt=new Date(date);dt.setDate(dt.getDate()+1);var e=dt.toISOString().slice(0,10).replace(/-/g,'');u+="&dates="+s+"/"+e;}
+    return u;
+  }
+  function openEvent(){document.getElementById('e_title').value='';document.getElementById('e_date').value='';document.getElementById('e_link').value='';document.getElementById('evSheet').classList.add('open');}
+  function closeEvent(){document.getElementById('evSheet').classList.remove('open');}
+  function readEvent(){return {title:document.getElementById('e_title').value.trim(),date:document.getElementById('e_date').value,link:document.getElementById('e_link').value.trim()};}
+  function storeEvent(ev){var a=getEvents();a.push(ev);setEvents(a);renderEvents();}
+  document.getElementById('addBtn').addEventListener('click',openEvent);
+  document.getElementById('addEventTop').addEventListener('click',openEvent);
+  document.getElementById('evSheet').addEventListener('click',function(e){if(e.target.id==='evSheet')closeEvent();});
+  document.getElementById('e_save').addEventListener('click',function(){var ev=readEvent();if(!ev.title){toast("Give it a name first");return;}storeEvent(ev);closeEvent();toast(ev.link?"Saved with its link":"Saved");});
+  document.getElementById('e_cal').addEventListener('click',function(){var ev=readEvent();if(!ev.title){toast("Give it a name first");return;}storeEvent(ev);closeEvent();window.open(calUrlFor(ev.title,ev.date,ev.link),"_blank");toast("Opening your calendar to confirm");});
+
   try{document.getElementById('today').textContent=new Date().toLocaleDateString('en-IE',{weekday:'long',day:'numeric',month:'long'});}catch(e){}
   applyName();
   render(false);
+  renderEvents();
   // first run: no details yet, gently open settings so this device gets personalised
   if(!localStorage.getItem('famhub_settings')){openSheet();}
 </script>
