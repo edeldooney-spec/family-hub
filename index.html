@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="theme-color" content="#1D9E75" />
+<meta name="theme-color" content="#FF6A3D" />
 <title>Family hub</title>
 <style>
   :root{
-    --bg:#ffffff; --line:#ece8e1;
-    --ink:#22201d; --muted:#6f6a62; --faint:#9b958b;
-    --accent:#1D9E75; --accent-ink:#0F6E56; --accent-soft:#E1F5EE;
-    --warm:#D85A30; --warm-soft:#FAECE7; --warm-ink:#993C1D;
+    --bg:#FFF7F0; --line:#F1E7DC;
+    --ink:#211E2B; --muted:#6B6573; --faint:#A99FA9;
+    --accent:#FF6A3D; --accent-ink:#B83C12; --accent-soft:#FFE6DC;
+    --warm:#FFAE2E; --warm-soft:#FFEFD2; --warm-ink:#9A5B00;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -40,6 +40,13 @@
   .head{display:flex;align-items:center;gap:11px;margin-bottom:9px}
   .av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex:0 0 auto}
   .av.warm{background:var(--warm-soft);color:var(--warm-ink)}
+  .av.c-amber{background:#FFEFD2;color:#9A5B00}
+  .av.c-blue{background:#E3EEFF;color:#1B4FB0}
+  .av.c-pink{background:#FFE3F0;color:#B11E66}
+  .av.c-green{background:#DCF4E9;color:#0E7048}
+  .av.c-violet{background:#ECE5FF;color:#5B33C4}
+  .av.c-cyan{background:#D8F3F7;color:#07788A}
+  .av.c-coral{background:#FFE6DC;color:#B83C12}
   .name{font-size:13px;font-weight:600;line-height:1.2}
   .time{font-size:11px;color:var(--faint)}
   .soon{margin-left:auto;font-size:10.5px;color:var(--faint);border:.5px solid var(--line);border-radius:7px;padding:3px 8px}
@@ -47,7 +54,7 @@
   .body b{color:var(--ink);font-weight:600}
   .row{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}
   .btn{font-size:12.5px;padding:7px 14px;border-radius:9px;border:.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
-  .btn.fill{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-soft)}
+  .btn.fill{background:var(--accent);color:#fff;border-color:var(--accent)}
   .nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;align-items:center;padding:13px 0 16px;border-top:.5px solid var(--line);background:var(--bg);font-size:24px;color:var(--faint)}
   .nav .home{color:var(--accent)}
   .nav .plus{font-size:30px}
@@ -100,16 +107,16 @@
 
   <div class="feed">
     <div class="post">
-      <div class="head"><div class="av">&#127903;</div><div><div class="name">Your events</div><div class="time">tickets &amp; plans, all in one place</div></div><button class="btn" id="addEventTop" style="margin-left:auto;padding:5px 12px">+ Add</button></div>
+      <div class="head"><div class="av c-coral">&#127903;</div><div><div class="name">Your events</div><div class="time">tickets &amp; plans, all in one place</div></div><button class="btn" id="addEventTop" style="margin-left:auto;padding:5px 12px">+ Add</button></div>
       <div class="body" id="eventsList"></div>
     </div>
     <div class="post">
-      <div class="head"><div class="av">&#10024;</div><div><div class="name">Today</div><div class="time">just now</div></div></div>
+      <div class="head"><div class="av c-amber">&#10024;</div><div><div class="name">Today</div><div class="time">just now</div></div></div>
       <div class="body">Tap below for what's on, anything to remember, and what's free.</div>
       <div class="row"><button class="btn fill" data-act="brief">What's on today?</button></div>
     </div>
     <div class="post">
-      <div class="head"><div class="av">&#127869;</div><div><div class="name">This week's meals</div><div class="time">tap to plan</div></div></div>
+      <div class="head"><div class="av c-green">&#127869;</div><div><div class="name">This week's meals</div><div class="time">tap to plan</div></div></div>
       <div class="body">Planned around what the kids like, quick on busy nights, and what's in season.</div>
       <div class="row">
         <button class="btn fill" data-act="meals">Suggest this week's meals</button>
@@ -117,12 +124,12 @@
       </div>
     </div>
     <div class="post">
-      <div class="head"><div class="av warm">&#9925;</div><div><div class="name">Weekend idea</div><div class="time">tap to plan</div></div><span class="soon">auto-weather coming</span></div>
+      <div class="head"><div class="av c-cyan">&#9925;</div><div><div class="name">Weekend idea</div><div class="time">tap to plan</div></div><span class="soon">auto-weather coming</span></div>
       <div class="body">Plans for the family based on the local weather and what's free in the calendar.</div>
       <div class="row"><button class="btn fill" data-act="weekend">Suggest a weekend plan</button></div>
     </div>
     <div class="post">
-      <div class="head"><div class="av warm">&#129490;</div><div><div class="name">Don't forget</div><div class="time">school &amp; activities</div></div></div>
+      <div class="head"><div class="av c-pink">&#129490;</div><div><div class="name">Don't forget</div><div class="time">school &amp; activities</div></div></div>
       <div class="body">Add anything from the school app or a note above and it won't get lost.</div>
       <div class="row"><button class="btn" data-act="calendar">Open calendar</button></div>
     </div>
@@ -184,12 +191,12 @@
 <script>
   var CLAUDE_URL = "https://claude.ai/new";
   var BUBBLES = [
-    {key:'brief',label:'Today',icon:'&#9728;'},
-    {key:'calendar',label:'Calendar',icon:'&#128197;'},
-    {key:'kids',label:'Kids',icon:'&#129490;'},
-    {key:'meals',label:'Meals',icon:'&#127869;'},
-    {key:'shop',label:'Shopping',icon:'&#128722;'},
-    {key:'weekend',label:'Weekend',icon:'&#9925;'}
+    {key:'brief',label:'Today',icon:'&#9728;',color:'#FF9F1C'},
+    {key:'calendar',label:'Calendar',icon:'&#128197;',color:'#2F7DF6'},
+    {key:'kids',label:'Kids',icon:'&#129490;',color:'#EC4D8E'},
+    {key:'meals',label:'Meals',icon:'&#127869;',color:'#1FA971'},
+    {key:'shop',label:'Shopping',icon:'&#128722;',color:'#8B5CF6'},
+    {key:'weekend',label:'Weekend',icon:'&#9925;',color:'#06B6C4'}
   ];
   var DEFAULT_SHOW = 4;
 
@@ -229,8 +236,8 @@
   function getCounts(){try{return JSON.parse(localStorage.getItem('famhub_usage')||'{}');}catch(e){return {};}}
   function bump(key){var c=getCounts();c[key]=(c[key]||0)+1;try{localStorage.setItem('famhub_usage',JSON.stringify(c));}catch(e){}}
   function ordered(){var c=getCounts();return BUBBLES.map(function(b,i){return {b:b,i:i,n:c[b.key]||0};}).sort(function(x,y){return (y.n-x.n)||(x.i-y.i);}).map(function(o){return o.b;});}
-  function makeBubble(key,label,icon,more){var btn=document.createElement('button');btn.className='story';btn.innerHTML='<span class="ring'+(more?' more':'')+'">'+icon+'</span><span>'+label+'</span>';btn.addEventListener('click',function(){if(key==='__more'){render(true);return;}if(key==='__less'){render(false);return;}bump(key);var a=ACTIONS[key];if(a)a();});return btn;}
-  function render(expanded){var wrap=document.getElementById('stories');wrap.innerHTML='';var list=ordered();(expanded?list:list.slice(0,DEFAULT_SHOW)).forEach(function(b){wrap.appendChild(makeBubble(b.key,b.label,b.icon,false));});if(list.length>DEFAULT_SHOW){wrap.appendChild(expanded?makeBubble('__less','Less','&#8722;',true):makeBubble('__more','More','&#8943;',true));}}
+  function makeBubble(key,label,icon,more,color){var btn=document.createElement('button');btn.className='story';var st=(color&&!more)?(' style="border-color:'+color+';color:'+color+'"'):'';btn.innerHTML='<span class="ring'+(more?' more':'')+'"'+st+'>'+icon+'</span><span>'+label+'</span>';btn.addEventListener('click',function(){if(key==='__more'){render(true);return;}if(key==='__less'){render(false);return;}bump(key);var a=ACTIONS[key];if(a)a();});return btn;}
+  function render(expanded){var wrap=document.getElementById('stories');wrap.innerHTML='';var list=ordered();(expanded?list:list.slice(0,DEFAULT_SHOW)).forEach(function(b){wrap.appendChild(makeBubble(b.key,b.label,b.icon,false,b.color));});if(list.length>DEFAULT_SHOW){wrap.appendChild(expanded?makeBubble('__less','Less','&#8722;',true):makeBubble('__more','More','&#8943;',true));}}
 
   // settings sheet wiring
   function openSheet(){var s=getSettings();document.getElementById('f_name').value=s.name||'';document.getElementById('f_place').value=s.place||'';document.getElementById('f_kids').value=s.kids||'';document.getElementById('f_stores').value=s.stores||'';document.getElementById('f_cal').value=s.calendar||'';document.getElementById('sheet').classList.add('open');}
