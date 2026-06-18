@@ -78,6 +78,9 @@
   .cname{font-size:14px;font-weight:600}
   .cdesc{font-size:12px;color:var(--muted);line-height:1.4;margin-top:1px}
   .soonpill{font-size:11px;color:var(--warm-ink);background:var(--warm-soft);padding:3px 10px;border-radius:8px;flex:0 0 auto}
+  .pick{font-size:13px;padding:10px 12px;border:.5px dashed var(--accent);background:var(--accent-soft);color:var(--accent-ink);border-radius:10px;cursor:pointer;width:100%}
+  .help{font-size:11.5px;color:var(--muted);margin:-6px 0 13px}
+  #e_preview img{max-width:100%;border-radius:10px;margin-top:8px;display:block}
 </style>
 </head>
 <body>
@@ -163,7 +166,7 @@
         <div class="crow2"><span class="ci">&#128197;</span><div class="cmeta"><div class="cname">Google Calendar</div><div class="cdesc">Drop captured events straight in, and read what's free</div></div><span class="soonpill">Soon</span></div>
         <div class="crow2"><span class="ci">&#9993;</span><div class="cmeta"><div class="cname">Email &amp; school app</div><div class="cdesc">Read the newsletters and pull the dates out for you</div></div><span class="soonpill">Soon</span></div>
         <div class="crow2"><span class="ci">&#9925;</span><div class="cmeta"><div class="cname">Weather</div><div class="cdesc">Auto weekend ideas from the Galway forecast</div></div><span class="soonpill">Soon</span></div>
-        <div class="crow2"><span class="ci">&#127903;</span><div class="cmeta"><div class="cname">Tickets &amp; things to do</div><div class="cdesc">Ticketmaster and Eventbrite, find and book family days out</div></div><span class="soonpill">Soon</span></div>
+        <div class="crow2"><span class="ci">&#127903;</span><div class="cmeta"><div class="cname">Tickets &amp; things to do</div><div class="cdesc"><a href="https://www.ticketmaster.ie" target="_blank" style="color:var(--accent-ink)">Open Ticketmaster</a> &middot; <a href="https://www.eventbrite.ie" target="_blank" style="color:var(--accent-ink)">Eventbrite</a></div></div><span class="soonpill" style="background:#DCF4E9;color:#0E7048">Live</span></div>
         <div class="crow2"><span class="ci">&#128722;</span><div class="cmeta"><div class="cname">Shopping</div><div class="cdesc">Send the list to your shop's app</div></div><span class="soonpill">Soon</span></div>
         <div class="crow2"><span class="ci">&#128241;</span><div class="cmeta"><div class="cname">giffgaff (mobile)</div><div class="cdesc">Family phone plans, top-ups and data, for when the kids get phones</div></div><span class="soonpill">Soon</span></div>
         <div class="crow2"><span class="ci">&#10024;</span><div class="cmeta"><div class="cname">Claude</div><div class="cdesc">Run the meal and weekend brains inside the app, no copy-paste</div></div><span class="soonpill">Soon</span></div>
@@ -180,6 +183,8 @@
       <div class="field"><label>What is it?</label><input id="e_title" placeholder="e.g. Disney on Ice"></div>
       <div class="field"><label>When?</label><input id="e_date" type="date"></div>
       <div class="field"><label>Ticket or booking link</label><input id="e_link" placeholder="paste the Eventbrite or Ticketmaster link"></div>
+      <p class="help">Need the link? <a href="https://www.ticketmaster.ie" target="_blank" style="color:var(--accent-ink)">Open Ticketmaster</a> &middot; <a href="https://www.eventbrite.ie" target="_blank" style="color:var(--accent-ink)">Eventbrite</a></p>
+      <div class="field"><label>Add a photo (ticket, invite, poster)</label><button class="pick" id="e_pickphoto" type="button">Choose from my photos</button><input id="e_photo" type="file" accept="image/*" hidden><div id="e_preview"></div></div>
       <button class="save" id="e_save">Save it here</button>
       <button class="save" id="e_cal" style="background:#fff;color:var(--accent-ink);border:.5px solid var(--line);margin-top:9px">Save &amp; add to my calendar</button>
       <p class="priv">Saved on this phone, with the link attached.</p>
@@ -277,7 +282,8 @@
     box.innerHTML=list.map(function(ev){
       var when=ev.date?(' &middot; '+niceDate(ev.date)):'';
       var lk=safeUrl(ev.link);var link=lk?(' &nbsp;<a href="'+lk+'" target="_blank" style="color:var(--accent-ink)">tickets</a>'):'';
-      return '<div style="padding:6px 0;border-bottom:.5px solid var(--line)"><b>'+esc(ev.title)+'</b>'+when+link+'</div>';
+      var thumb=ev.img?('<div style="margin-top:7px"><img src="'+ev.img+'" style="max-width:100%;border-radius:10px;display:block"></div>'):'';
+      return '<div style="padding:6px 0;border-bottom:.5px solid var(--line)"><b>'+esc(ev.title)+'</b>'+when+link+thumb+'</div>';
     }).join('');
   }
   function calUrlFor(title,date,link){
@@ -286,15 +292,33 @@
     if(date){var s=date.replace(/-/g,'');var dt=new Date(date);dt.setDate(dt.getDate()+1);var e=dt.toISOString().slice(0,10).replace(/-/g,'');u+="&dates="+s+"/"+e;}
     return u;
   }
-  function openEvent(){document.getElementById('e_title').value='';document.getElementById('e_date').value='';document.getElementById('e_link').value='';document.getElementById('evSheet').classList.add('open');}
+  var currentImg='';
+  // shrink the chosen photo so it stores neatly on the phone
+  function downscaleImage(file,cb){
+    var img=new Image();var r=new FileReader();
+    r.onload=function(){img.onload=function(){
+      var max=900,w=img.width,h=img.height;
+      if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>max){w=Math.round(w*max/h);h=max;}
+      var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      try{cb(c.toDataURL('image/jpeg',0.6));}catch(e){cb('');}
+    };img.src=r.result;};
+    r.readAsDataURL(file);
+  }
+  function openEvent(){currentImg='';document.getElementById('e_preview').innerHTML='';document.getElementById('e_title').value='';document.getElementById('e_date').value='';document.getElementById('e_link').value='';document.getElementById('evSheet').classList.add('open');}
   function closeEvent(){document.getElementById('evSheet').classList.remove('open');}
-  function readEvent(){return {title:document.getElementById('e_title').value.trim(),date:document.getElementById('e_date').value,link:document.getElementById('e_link').value.trim()};}
+  function readEvent(){return {title:document.getElementById('e_title').value.trim(),date:document.getElementById('e_date').value,link:document.getElementById('e_link').value.trim(),img:currentImg};}
   function storeEvent(ev){var a=getEvents();a.push(ev);setEvents(a);renderEvents();}
   document.getElementById('addBtn').addEventListener('click',openEvent);
   document.getElementById('addEventTop').addEventListener('click',openEvent);
   document.getElementById('evSheet').addEventListener('click',function(e){if(e.target.id==='evSheet')closeEvent();});
   document.getElementById('e_save').addEventListener('click',function(){var ev=readEvent();if(!ev.title){toast("Give it a name first");return;}storeEvent(ev);closeEvent();toast(ev.link?"Saved with its link":"Saved");});
   document.getElementById('e_cal').addEventListener('click',function(){var ev=readEvent();if(!ev.title){toast("Give it a name first");return;}storeEvent(ev);closeEvent();window.open(calUrlFor(ev.title,ev.date,ev.link),"_blank");toast("Opening your calendar to confirm");});
+  document.getElementById('e_pickphoto').addEventListener('click',function(){document.getElementById('e_photo').click();});
+  document.getElementById('e_photo').addEventListener('change',function(){
+    if(!this.files||!this.files.length){return;}
+    downscaleImage(this.files[0],function(data){currentImg=data;document.getElementById('e_preview').innerHTML=data?'<img src="'+data+'" alt="">':'';});
+    this.value='';
+  });
 
   try{document.getElementById('today').textContent=new Date().toLocaleDateString('en-IE',{weekday:'long',day:'numeric',month:'long'});}catch(e){}
   applyName();
