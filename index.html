@@ -20,7 +20,8 @@
   .top{display:flex;align-items:center;padding:16px 18px 12px;border-bottom:.5px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
   .top h1{font-size:20px;font-weight:600;margin:0}
   .top .date{font-size:12px;color:var(--faint);margin-top:1px}
-  .top .gear{margin-left:auto;font-size:21px;color:var(--muted);background:none;border:none;cursor:pointer}
+  .top .acts{margin-left:auto;display:flex;gap:16px}
+  .top .gear{font-size:21px;color:var(--muted);background:none;border:none;cursor:pointer}
   .stories{display:flex;gap:15px;padding:14px 18px;overflow-x:auto;scrollbar-width:none}
   .stories::-webkit-scrollbar{display:none}
   .story{flex:0 0 auto;width:60px;text-align:center;background:none;border:none;padding:0;cursor:pointer}
@@ -63,6 +64,13 @@
   .field input{width:100%;font:inherit;font-size:14px;padding:10px 12px;border:.5px solid var(--line);border-radius:10px;outline:none;color:var(--ink);background:#fff}
   .panel .save{width:100%;margin-top:6px;font-size:14px;padding:12px;border:none;border-radius:11px;background:var(--accent);color:#fff;cursor:pointer}
   .panel .priv{font-size:11px;color:var(--faint);margin-top:12px;line-height:1.5;text-align:center}
+  .crow2{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:.5px solid var(--line)}
+  .crow2:last-child{border-bottom:none}
+  .ci{font-size:20px;width:30px;text-align:center;flex:0 0 auto}
+  .cmeta{flex:1}
+  .cname{font-size:14px;font-weight:600}
+  .cdesc{font-size:12px;color:var(--muted);line-height:1.4;margin-top:1px}
+  .soonpill{font-size:11px;color:var(--warm-ink);background:var(--warm-soft);padding:3px 10px;border-radius:8px;flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -72,7 +80,10 @@
       <h1 id="famName">Family hub</h1>
       <div class="date" id="today">today</div>
     </div>
-    <button class="gear" id="gear" aria-label="Settings">&#9881;</button>
+    <div class="acts">
+      <button class="gear" id="connBtn" aria-label="Connections">&#128279;</button>
+      <button class="gear" id="gear" aria-label="Settings">&#9881;</button>
+    </div>
   </div>
 
   <div class="stories" id="stories"></div>
@@ -129,6 +140,23 @@
       <div class="field"><label>Your calendar link</label><input id="f_cal" placeholder="https://calendar.google.com"></div>
       <button class="save" id="saveBtn">Save</button>
       <p class="priv">Stored only on this phone. Clear it any time by tapping Save with the boxes empty.</p>
+    </div>
+  </div>
+
+  <!-- Connections: where your apps will plug in, same idea as Claude's connectors -->
+  <div class="sheet" id="connSheet">
+    <div class="panel">
+      <h2>Connections</h2>
+      <p class="sub">This is where your apps plug in, the same idea as Claude's connectors. Nothing's live yet, these switch on in the next stage.</p>
+      <div>
+        <div class="crow2"><span class="ci">&#128197;</span><div class="cmeta"><div class="cname">Google Calendar</div><div class="cdesc">Drop captured events straight in, and read what's free</div></div><span class="soonpill">Soon</span></div>
+        <div class="crow2"><span class="ci">&#9993;</span><div class="cmeta"><div class="cname">Email &amp; school app</div><div class="cdesc">Read the newsletters and pull the dates out for you</div></div><span class="soonpill">Soon</span></div>
+        <div class="crow2"><span class="ci">&#9925;</span><div class="cmeta"><div class="cname">Weather</div><div class="cdesc">Auto weekend ideas from the Galway forecast</div></div><span class="soonpill">Soon</span></div>
+        <div class="crow2"><span class="ci">&#127903;</span><div class="cmeta"><div class="cname">Tickets &amp; things to do</div><div class="cdesc">Ticketmaster and gig sites, find and book family days out</div></div><span class="soonpill">Soon</span></div>
+        <div class="crow2"><span class="ci">&#128722;</span><div class="cmeta"><div class="cname">Shopping</div><div class="cdesc">Send the list to your shop's app</div></div><span class="soonpill">Soon</span></div>
+        <div class="crow2"><span class="ci">&#10024;</span><div class="cmeta"><div class="cname">Claude</div><div class="cdesc">Run the meal and weekend brains inside the app, no copy-paste</div></div><span class="soonpill">Soon</span></div>
+      </div>
+      <p class="priv">These need the secure helper we build in Stage 2. Each will be a simple Connect button with a Google-style login.</p>
     </div>
   </div>
 
@@ -192,6 +220,8 @@
 
   document.getElementById('gear').addEventListener('click',openSheet);
   document.getElementById('sheet').addEventListener('click',function(e){if(e.target.id==='sheet')closeSheet();});
+  document.getElementById('connBtn').addEventListener('click',function(){document.getElementById('connSheet').classList.add('open');});
+  document.getElementById('connSheet').addEventListener('click',function(e){if(e.target.id==='connSheet')this.classList.remove('open');});
   document.getElementById('saveBtn').addEventListener('click',function(){
     saveSettings({
       name:document.getElementById('f_name').value.trim(),
