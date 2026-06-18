@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#1D9E75" />
+<title>Family hub</title>
+<style>
+  :root{
+    --bg:#ffffff; --line:#ece8e1;
+    --ink:#22201d; --muted:#6f6a62; --faint:#9b958b;
+    --accent:#1D9E75; --accent-ink:#0F6E56; --accent-soft:#E1F5EE;
+    --warm:#D85A30; --warm-soft:#FAECE7; --warm-ink:#993C1D;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:74px;}
+  .top{display:flex;align-items:center;padding:16px 18px 12px;border-bottom:.5px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+  .top h1{font-size:20px;font-weight:600;margin:0}
+  .top .date{font-size:12px;color:var(--faint);margin-top:1px}
+  .top .gear{margin-left:auto;font-size:21px;color:var(--muted);background:none;border:none;cursor:pointer}
+  .stories{display:flex;gap:15px;padding:14px 18px;overflow-x:auto;scrollbar-width:none}
+  .stories::-webkit-scrollbar{display:none}
+  .story{flex:0 0 auto;width:60px;text-align:center;background:none;border:none;padding:0;cursor:pointer}
+  .ring{width:56px;height:56px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;color:var(--accent-ink);font-size:23px;margin:0 auto;background:#fff}
+  .ring.more{border-style:dashed;border-color:var(--faint);color:var(--faint)}
+  .story span:last-child{display:block;font-size:11px;color:var(--muted);margin-top:5px}
+  .capture{margin:6px 14px 14px;border:.5px solid var(--line);border-radius:16px;padding:12px 14px}
+  .capture textarea{width:100%;border:none;resize:none;font:inherit;font-size:14px;color:var(--ink);outline:none;background:transparent;min-height:40px}
+  .capture textarea::placeholder{color:var(--faint)}
+  .capture .crow{display:flex;align-items:center;margin-top:6px}
+  .capture .hint{font-size:11px;color:var(--faint)}
+  .capture .cam{font-size:17px;background:var(--accent-soft);color:var(--accent-ink);border:none;border-radius:9px;padding:5px 11px;cursor:pointer;margin-right:9px}
+  .capture .send{margin-left:auto;font-size:12.5px;padding:7px 14px;border-radius:9px;background:var(--accent-soft);color:var(--accent-ink);border:none;cursor:pointer}
+  .feed{padding:0 14px}
+  .post{border:.5px solid var(--line);border-radius:16px;padding:13px 15px;margin-bottom:13px}
+  .head{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex:0 0 auto}
+  .av.warm{background:var(--warm-soft);color:var(--warm-ink)}
+  .name{font-size:13px;font-weight:600;line-height:1.2}
+  .time{font-size:11px;color:var(--faint)}
+  .soon{margin-left:auto;font-size:10.5px;color:var(--faint);border:.5px solid var(--line);border-radius:7px;padding:3px 8px}
+  .body{font-size:13.5px;color:var(--muted);line-height:1.6}
+  .body b{color:var(--ink);font-weight:600}
+  .row{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{font-size:12.5px;padding:7px 14px;border-radius:9px;border:.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+  .btn.fill{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-soft)}
+  .nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;align-items:center;padding:13px 0 16px;border-top:.5px solid var(--line);background:var(--bg);font-size:24px;color:var(--faint)}
+  .nav .home{color:var(--accent)}
+  .nav .plus{font-size:30px}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#22201d;color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:40;max-width:80%;text-align:center}
+  .toast.show{opacity:1}
+  /* settings: where YOUR details live. Stored on this device only, never in the code. */
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-end;z-index:50}
+  .sheet.open{display:flex}
+  .panel{background:var(--bg);width:100%;border-radius:18px 18px 0 0;padding:18px 18px 26px;max-height:88%;overflow:auto}
+  .panel h2{font-size:17px;font-weight:600;margin:0 0 4px}
+  .panel p.sub{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .field input{width:100%;font:inherit;font-size:14px;padding:10px 12px;border:.5px solid var(--line);border-radius:10px;outline:none;color:var(--ink);background:#fff}
+  .panel .save{width:100%;margin-top:6px;font-size:14px;padding:12px;border:none;border-radius:11px;background:var(--accent);color:#fff;cursor:pointer}
+  .panel .priv{font-size:11px;color:var(--faint);margin-top:12px;line-height:1.5;text-align:center}
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <div>
+      <h1 id="famName">Family hub</h1>
+      <div class="date" id="today">today</div>
+    </div>
+    <button class="gear" id="gear" aria-label="Settings">&#9881;</button>
+  </div>
+
+  <div class="stories" id="stories"></div>
+
+  <div class="capture">
+    <textarea id="cap" placeholder="Add anything... a school note, a plan, a reminder. Tap the mic on your keyboard to speak it."></textarea>
+    <div class="crow">
+      <button class="cam" id="camBtn" type="button" aria-label="Snap a note or invite">&#128247;</button>
+      <span class="hint">snap a note, speak it, or type it</span>
+      <button class="send" id="capSend">Send to our planner</button>
+    </div>
+    <input id="photo" type="file" accept="image/*" capture="environment" hidden />
+  </div>
+
+  <div class="feed">
+    <div class="post">
+      <div class="head"><div class="av">&#10024;</div><div><div class="name">Today</div><div class="time">just now</div></div></div>
+      <div class="body">Tap below for what's on, anything to remember, and what's free.</div>
+      <div class="row"><button class="btn fill" data-act="brief">What's on today?</button></div>
+    </div>
+    <div class="post">
+      <div class="head"><div class="av">&#127869;</div><div><div class="name">This week's meals</div><div class="time">tap to plan</div></div></div>
+      <div class="body">Planned around what the kids like, quick on busy nights, and what's in season.</div>
+      <div class="row">
+        <button class="btn fill" data-act="meals">Suggest this week's meals</button>
+        <button class="btn" data-act="shop">Make the shopping list</button>
+      </div>
+    </div>
+    <div class="post">
+      <div class="head"><div class="av warm">&#9925;</div><div><div class="name">Weekend idea</div><div class="time">tap to plan</div></div><span class="soon">auto-weather coming</span></div>
+      <div class="body">Plans for the family based on the local weather and what's free in the calendar.</div>
+      <div class="row"><button class="btn fill" data-act="weekend">Suggest a weekend plan</button></div>
+    </div>
+    <div class="post">
+      <div class="head"><div class="av warm">&#129490;</div><div><div class="name">Don't forget</div><div class="time">school &amp; activities</div></div></div>
+      <div class="body">Add anything from the school app or a note above and it won't get lost.</div>
+      <div class="row"><button class="btn" data-act="calendar">Open calendar</button></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <span class="home">&#127968;</span><span>&#128269;</span><span class="plus">&#10753;</span><span>&#9825;</span><span>&#128100;</span>
+  </div>
+
+  <!-- Settings sheet: the only place personal details live, and they stay on this device -->
+  <div class="sheet" id="sheet">
+    <div class="panel">
+      <h2>Your family</h2>
+      <p class="sub">This stays on your device. None of it is saved into the app, so the app itself never carries anyone's personal details.</p>
+      <div class="field"><label>Family name (shown at the top)</label><input id="f_name" placeholder="e.g. The Murphys"></div>
+      <div class="field"><label>Where you live (for local ideas)</label><input id="f_place" placeholder="e.g. Galway"></div>
+      <div class="field"><label>Kids (names and ages)</label><input id="f_kids" placeholder="e.g. Cian 6, Grace 5"></div>
+      <div class="field"><label>Shops you use (for lists)</label><input id="f_stores" placeholder="e.g. Tesco, Aldi, SuperValu"></div>
+      <div class="field"><label>Your calendar link</label><input id="f_cal" placeholder="https://calendar.google.com"></div>
+      <button class="save" id="saveBtn">Save</button>
+      <p class="priv">Stored only on this phone. Clear it any time by tapping Save with the boxes empty.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  var CLAUDE_URL = "https://claude.ai/new";
+  var BUBBLES = [
+    {key:'brief',label:'Today',icon:'&#9728;'},
+    {key:'calendar',label:'Calendar',icon:'&#128197;'},
+    {key:'kids',label:'Kids',icon:'&#129490;'},
+    {key:'meals',label:'Meals',icon:'&#127869;'},
+    {key:'shop',label:'Shopping',icon:'&#128722;'},
+    {key:'weekend',label:'Weekend',icon:'&#9925;'}
+  ];
+  var DEFAULT_SHOW = 4;
+
+  // ---- settings: read/write the family's own details, on this device only ----
+  function getSettings(){try{return JSON.parse(localStorage.getItem('famhub_settings')||'{}');}catch(e){return {};}}
+  function saveSettings(s){try{localStorage.setItem('famhub_settings',JSON.stringify(s));}catch(e){}}
+  function place(){return (getSettings().place||'').trim();}
+  function kids(){return (getSettings().kids||'').trim();}
+  function stores(){return (getSettings().stores||'').trim();}
+  function calUrl(){return (getSettings().calendar||'').trim() || 'https://calendar.google.com';}
+  function familyLine(){var k=kids(); var p=place(); return 'our family'+(k?(' ('+k+')'):'')+(p?(' in '+p):'');}
+
+  function PROMPT(key){
+    var fam=familyLine(), p=place()||'our area', s=stores()||'local supermarkets';
+    if(key==='brief')   return "Give me today's family plan: what's on for everyone, anything I might forget, and what's free.";
+    if(key==='kids')    return "Help me stay on top of "+(kids()||'the kids')+": school and activities coming up, and what I should prepare.";
+    if(key==='meals')   return "Suggest a 5-night dinner plan for "+fam+". Keep busy weeknights quick, use what's in season now, and keep it kid-friendly with some variety.";
+    if(key==='shop')    return "Turn this week's dinner plan into a shopping list grouped by aisle, for "+s+".";
+    if(key==='weekend') return "Suggest 3 weekend plans for "+fam+" near "+p+": a rainy-day option, a dry-day option, and a low-key one at home.";
+    return "";
+  }
+  var PHOTO_READ = "I'm attaching a photo of a school note, invite or schedule. Read it, pull out every date, time, event and to-do, and tell me exactly what to add to my calendar and lists"+(kids()?(" for "+kids()):"")+". Flag anything unclear.";
+
+  function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2800);}
+  function askClaude(text,note){function go(){toast(note||"Copied — paste it into Claude");window.open(CLAUDE_URL,"_blank");}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(go,go);}else{go();}}
+
+  var ACTIONS={
+    brief:function(){askClaude(PROMPT('brief'))},
+    kids:function(){askClaude(PROMPT('kids'))},
+    meals:function(){askClaude(PROMPT('meals'))},
+    shop:function(){askClaude(PROMPT('shop'))},
+    weekend:function(){askClaude(PROMPT('weekend'))},
+    calendar:function(){window.open(calUrl(),"_blank")}
+  };
+
+  // bubbles learn which are used most and reorder next open
+  function getCounts(){try{return JSON.parse(localStorage.getItem('famhub_usage')||'{}');}catch(e){return {};}}
+  function bump(key){var c=getCounts();c[key]=(c[key]||0)+1;try{localStorage.setItem('famhub_usage',JSON.stringify(c));}catch(e){}}
+  function ordered(){var c=getCounts();return BUBBLES.map(function(b,i){return {b:b,i:i,n:c[b.key]||0};}).sort(function(x,y){return (y.n-x.n)||(x.i-y.i);}).map(function(o){return o.b;});}
+  function makeBubble(key,label,icon,more){var btn=document.createElement('button');btn.className='story';btn.innerHTML='<span class="ring'+(more?' more':'')+'">'+icon+'</span><span>'+label+'</span>';btn.addEventListener('click',function(){if(key==='__more'){render(true);return;}if(key==='__less'){render(false);return;}bump(key);var a=ACTIONS[key];if(a)a();});return btn;}
+  function render(expanded){var wrap=document.getElementById('stories');wrap.innerHTML='';var list=ordered();(expanded?list:list.slice(0,DEFAULT_SHOW)).forEach(function(b){wrap.appendChild(makeBubble(b.key,b.label,b.icon,false));});if(list.length>DEFAULT_SHOW){wrap.appendChild(expanded?makeBubble('__less','Less','&#8722;',true):makeBubble('__more','More','&#8943;',true));}}
+
+  // settings sheet wiring
+  function openSheet(){var s=getSettings();document.getElementById('f_name').value=s.name||'';document.getElementById('f_place').value=s.place||'';document.getElementById('f_kids').value=s.kids||'';document.getElementById('f_stores').value=s.stores||'';document.getElementById('f_cal').value=s.calendar||'';document.getElementById('sheet').classList.add('open');}
+  function closeSheet(){document.getElementById('sheet').classList.remove('open');}
+  function applyName(){var n=(getSettings().name||'').trim();document.getElementById('famName').textContent=n||'Family hub';}
+
+  document.getElementById('gear').addEventListener('click',openSheet);
+  document.getElementById('sheet').addEventListener('click',function(e){if(e.target.id==='sheet')closeSheet();});
+  document.getElementById('saveBtn').addEventListener('click',function(){
+    saveSettings({
+      name:document.getElementById('f_name').value.trim(),
+      place:document.getElementById('f_place').value.trim(),
+      kids:document.getElementById('f_kids').value.trim(),
+      stores:document.getElementById('f_stores').value.trim(),
+      calendar:document.getElementById('f_cal').value.trim()
+    });
+    applyName();closeSheet();toast("Saved on this device");
+  });
+
+  document.getElementById('camBtn').addEventListener('click',function(){document.getElementById('photo').click();});
+  document.getElementById('photo').addEventListener('change',function(){if(!this.files||!this.files.length){return;}askClaude(PHOTO_READ,"Photo saved — in Claude tap attach, then Recents to add it");this.value="";});
+  document.getElementById('capSend').addEventListener('click',function(){var v=document.getElementById('cap').value.trim();if(!v){toast("Type or speak something first");return;}askClaude("Add this to our family plan and tell me if it needs a calendar event or reminder: "+v);document.getElementById('cap').value="";});
+  document.querySelectorAll('.feed [data-act]').forEach(function(el){el.addEventListener('click',function(){var k=el.getAttribute('data-act');bump(k);var a=ACTIONS[k];if(a)a();});});
+
+  try{document.getElementById('today').textContent=new Date().toLocaleDateString('en-IE',{weekday:'long',day:'numeric',month:'long'});}catch(e){}
+  applyName();
+  render(false);
+  // first run: no details yet, gently open settings so this device gets personalised
+  if(!localStorage.getItem('famhub_settings')){openSheet();}
+</script>
+</body>
+</html>
